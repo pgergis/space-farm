@@ -3,6 +3,13 @@ version 16
 __lua__
 
 function _init()
+	star_list={}
+	for i=1,150 do
+		star_list[i]={}
+		star_list[i].x=rnd(508)
+		star_list[i].y=rnd(55)
+	end
+
     map_size = 16
     horizon_height = 32
     game_over=false
@@ -12,6 +19,12 @@ end
 
 function _update()
     player:input()
+end
+
+function draw_stars()
+	for i=1,#star_list do
+		pset((-player.d*0.03*508+star_list[i].x),star_list[i].y,15)
+	end
 end
 
 function draw_3d()
@@ -30,6 +43,7 @@ function draw_3d()
         local x=player.x
         local y=player.y
         local z=player.z
+        player:set_selected_tile()
 
         local ix=flr(x)
         local iy=flr(y)
@@ -126,6 +140,9 @@ function get_height(celx, cely)
 end
 
 function get_color(celx,cely)
+    if player.selected_tile_x==celx and player.selected_tile_y==cely then
+        return 8
+    end
     local tile = mget(celx,cely)
     return ground_colors[tile]
 end
@@ -133,6 +150,7 @@ end
 function _draw()
     cls()
     rectfill(0,0,127,127,1)
+    draw_stars()
     draw_3d()
     if draw_map then
         map(0,0, 0,0, 16,16)
@@ -150,6 +168,13 @@ function player:init()
     self.z=0
     self.d=0.5
     self.speed=0.05
+
+    self:set_selected_tile()
+end
+
+function player:set_selected_tile()
+    self.selected_tile_x=flr(self.x + cos(self.d))
+    self.selected_tile_y=flr(self.y + sin(self.d))
 end
 
 function player:draw_on_map()
